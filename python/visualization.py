@@ -8,6 +8,7 @@ import microphone
 import dsp
 import led
 import sys
+import socket
 
 visType = sys.argv[1]
 
@@ -16,6 +17,14 @@ _time_prev = time.time() * 1000.0
 
 _fps = dsp.ExpFilter(val=config.FPS, alpha_decay=0.2, alpha_rise=0.2)
 """The low-pass filter used to estimate frames-per-second"""
+
+_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+_server_address = ('localhost', 10000)
+
+
+def send_datagram():
+    global _sock
+
 
 
 def frames_per_second():
@@ -232,9 +241,9 @@ def microphone_update(audio_samples):
             x = np.linspace(config.MIN_FREQUENCY, config.MAX_FREQUENCY, len(mel))
             mel_curve.setData(x=x, y=fft_plot_filter.update(mel))
             # Plot the color channels
-            r_curve.setData(y=led.pixels[0])
-            g_curve.setData(y=led.pixels[1])
-            b_curve.setData(y=led.pixels[2])
+            r_curve.setData(y=output[0])
+            g_curve.setData(y=output[1])
+            b_curve.setData(y=output[2])
     if config.USE_GUI:
         app.processEvents()
     
