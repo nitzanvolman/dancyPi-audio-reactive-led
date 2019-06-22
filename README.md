@@ -1,3 +1,10 @@
+# Audio Reactive LEDs on Sparky 
+Adapting this awesome project to power the lights on Sparly. 
+
+
+
+
+
 # Nazberry Pi - Audio Reactive LEDs
 
 Original Readme text can be found below. You can also go to the main repo for more details. 
