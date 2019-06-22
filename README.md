@@ -1,5 +1,6 @@
 # Audio Reactive LEDs on Sparky 
-Adapting this awesome project to power the lights on Sparly. 
+Adapting this awesome project to power the lights on Sparky. 
+
 
 
 
