@@ -47,6 +47,8 @@ pixels = np.tile(1, (3, config.N_PIXELS))
 
 _is_python_2 = int(platform.python_version_tuple()[0]) == 2
 
+brightness = 80
+
 def _update_esp8266():
     """Sends UDP packets to ESP8266 to update LED strip values
 
@@ -118,7 +120,7 @@ def _update_wifi():
     #         m.append((p[0][i], p[1][i], p[2][i]))  # Index of pixel to change
     #
     for pc in pixel_channels:
-        pc.send(np.copy(m))
+        pc.send(np.copy(m), brightness)
     # print("===========================")
     _prev_pixels = np.copy(p)
 

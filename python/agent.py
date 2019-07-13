@@ -18,7 +18,7 @@ if STRIP_TYPE == 'NEOPIXEL':
         def __init__(self, num_pixels=144, pixel_pin = board.D18, ORDER = neopixel.GRB):
             self.pixels = neopixel.NeoPixel(pixel_pin, num_pixels, brightness=0.2, auto_write=False,pixel_order=ORDER, bpp=3)
 
-        def render_pixels(self, data):
+        def render_pixels(self, data, brightness):
             # print(len(data))
             for i in range(0, len(data)):
                 self.pixels[i] = data[i]
@@ -35,10 +35,10 @@ elif STRIP_TYPE == 'APA102':
         def __init__(self, num_pixels=144):
             self.strip = apa102.APA102(num_pixels)
 
-        def render_pixels(self, data):
+        def render_pixels(self, data, brightness):
             # print(len(data))
             for i in range(0, len(data)):
-                self.strip.set_pixel(i, data[i][0], data[i][1], data[i][2])
+                self.strip.set_pixel(i, data[i][0], data[i][1], data[i][2], brightness)
             self.strip.show()
 
         def clear(self):
@@ -66,15 +66,12 @@ while True:
     ts = int(time.time()*1000.0) - start_time
     # print(from_start - prev_from_start)
 
-
-    data = pm.pixels
-
-    if len(data) == 0:
+    if len(pm.pixels) == 0:
         strip.clear()
         continue
 
     # s1 = int(time.time()*1000.0)
-    strip.render_pixels(data)
+    strip.render_pixels(pm.pixels, pm.brightness)
     # print(int(time.time()*1000.0 - s1))
 
     # # print(len(data))

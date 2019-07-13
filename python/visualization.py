@@ -251,6 +251,7 @@ def microphone_update(audio_samples):
         # Map filterbank output onto LED strip
         output = visualization_effect(mel)
         led.pixels = output
+        led.brightness = param.children()[0].value()
         led.update()
         if config.USE_GUI:
             # Plot filterbank output
@@ -325,14 +326,10 @@ if config.USE_GUI:
     glayout = QtGui.QGridLayout()
     # effect selection
     paramSpec = [
-        {'name': 'Brightness', 'type':'int', 'value':31, 'limits': (2, 31)},
+        {'name': 'Brightness', 'type':'int', 'value':80, 'limits': (1, 100)},
         {'name': 'Effect', 'type': 'list', 'values': ['energy', 'scroll', 'spectrum', 'solid'], 'value': 'energy', 'sigValueChanged':onEffectChanged},
         # dict(name='bool', type='bool', readonly=False),
         dict(name='color', type='color', readonly=False),
-        # {'name': 'Frequency Filter', 'type': 'group', 'children': [
-        #     {'name': 'Units + SI prefix', 'type': 'float', 'value': 1.2e-6, 'step': 1e-6, 'siPrefix': True, 'suffix': 'V'},
-        #     {'name': 'Limits (min=7;max=15)', 'type': 'int', 'value': 11, 'limits': (7, 15), 'default': -6},
-        #     {'name': 'DEC stepping', 'type': 'float', 'value': 1.2e6, 'dec': True, 'step': 1, 'siPrefix': True, 'suffix': 'Hz'},
         #
         # ]},
     ]
@@ -342,7 +339,7 @@ if config.USE_GUI:
     glayout.addWidget(tree)
     win.setLayout(glayout)
     win.show()
-    win.resize(800, 500)
+    win.resize(400, 500)
 
     view = pg.GraphicsView()
     # mainLayout = QtGui.QHBoxLayout()
@@ -351,7 +348,7 @@ if config.USE_GUI:
     view.setCentralItem(layout)
     view.show()
     view.setWindowTitle('Visualization')
-    view.resize(600,200)
+    view.resize(600,300)
 
     # Mel filterbank plot
     # fft_plot = layout.addPlot(title='Filterbank Output', colspan=3)

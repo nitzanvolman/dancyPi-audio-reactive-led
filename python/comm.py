@@ -40,8 +40,8 @@ class PixelsChannel:
 
 
     #send the next data_packat
-    def send(self, pixels):
-        pm = PixelsMessage(pixels)
+    def send(self, pixels, brightness):
+        pm = PixelsMessage(pixels, 0, 0, brightness)
         msg = pm.to_bytes()
         # print(len(msg))
         self.sock.sendto(msg, (self.ip, self.port))
