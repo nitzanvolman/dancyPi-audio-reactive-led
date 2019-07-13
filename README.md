@@ -1,7 +1,29 @@
 # Audio Reactive LEDs on Sparky 
-Adapting this awesome project to power the lights on Sparky. 
+Adapting this awesome project to power the lights on Sparky.
+
+### high level steps to get this to work ###
 
 
+* agent.py, comm.py and apa102.py need to be on the raspberry pi.
+* sorry for not writing down the required libraries - but they are the usual suspects with python 3.5
+* configure agent.py on the pi and run it with sudo. 
+* configure config.py and run visualisation.py on the computer.
+* on the pi install the folowing:
+
+
+
+```
+install adafruit-blinka 
+```
+
+run this on the pi:
+```
+sudo apt-get update
+sudo apt-get install build-essential python-pip python-dev python-smbus git
+git clone https://github.com/adafruit/Adafruit_Python_GPIO.git
+cd Adafruit_Python_GPIO
+sudo python setup.py install
+```
 
 
 

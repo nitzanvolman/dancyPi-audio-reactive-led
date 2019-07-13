@@ -9,6 +9,9 @@ import config
 if config.DEVICE == 'esp8266':
     import socket
     _sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+if config.DEVICE == 'wifi':
+    import comm
+    pixel_channel = comm.PixelsChannel()
 # Raspberry Pi controls the LED strip directly
 elif config.DEVICE == 'pi':
     import neopixel
@@ -82,6 +85,40 @@ def _update_esp8266():
         _sock.sendto(m, (config.UDP_IP, config.UDP_PORT))
     _prev_pixels = np.copy(p)
 
+def _update_wifi():
+    """Sends UDP packets via wifi to update LED strip values (using modified protocol)
+
+    The agent.py will receive and decode the packets to determine what values
+    to display on the LED strip. The communication protocol supports LED strips
+    with a maximum of 700 LEDs. (on a 1500MTU network)
+
+    The packet encoding scheme is is defined in comm.py (pickle of array of pixel tuples (r,g,b) )
+    where
+        r (0 to 255): Red value of LED
+        g (0 to 255): Green value of LED
+        b (0 to 255): Blue value of LED
+    """
+    global pixels, _prev_pixels
+
+    # Truncate values and cast to integer
+    pixels = np.clip(pixels, 0, 255).astype(int)
+    # Optionally apply gamma correc tio
+    p = _gamma[pixels] if config.SOFTWARE_GAMMA_CORRECTION else np.copy(pixels)
+    m = []
+    for i in range(0, config.N_PIXELS):
+        m.append( (p[0][i], p[1][i], p[2][i]) )
+    # print("------------------------")
+    #
+    # print(m)
+    # for packet_indices in idx:
+    #     m = []
+    #     for i in packet_indices:
+    #         m.append((p[0][i], p[1][i], p[2][i]))  # Index of pixel to change
+    #
+    pixel_channel.send(np.copy(m), config.UDP_IP, config.UDP_PORT)
+    # print("===========================")
+    _prev_pixels = np.copy(p)
+
 
 def _update_pi():
     """Writes new LED values to the Raspberry Pi's LED strip
@@ -139,6 +176,8 @@ def update():
     """Updates the LED strip values"""
     if config.DEVICE == 'esp8266':
         _update_esp8266()
+    elif config.DEVICE == 'wifi':
+        _update_wifi()
     elif config.DEVICE == 'pi':
         _update_pi()
     elif config.DEVICE == 'blinkstick':

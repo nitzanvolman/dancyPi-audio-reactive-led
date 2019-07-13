@@ -1,36 +1,50 @@
-import socket
-import sys
-import numpy as np
+"""
+This File should run on the raspberry pi that is driving the strip.
+it will listed on
+"""
 import time
-import board
-import neopixel
+import comm
 from datetime import datetime
 
+STRIP_TYPE = 'APA102' #APA102 or NEOPIXEL
+strip = None
 
-# Choose an open pin connected to the Data In of the NeoPixel strip, i.e. board.D18
-# NeoPixels must be connected to D10, D12, D18 or D21 to work.
-pixel_pin = board.D18
-ORDER = neopixel.GRB
-# The number of NeoPixels
-num_pixels = 144
+TARGET_FPS = 25
 
-pixels = neopixel.NeoPixel(pixel_pin, num_pixels, brightness=0.2, auto_write=False,pixel_order=ORDER)
+if STRIP_TYPE == 'NEOPIXEL':
+    import neopixel
+    import board
+    class NeoPixelStrip:
+        def __init__(self, num_pixels=144, pixel_pin = board.D18, ORDER = neopixel.GRB):
+            self.pixels = neopixel.NeoPixel(pixel_pin, num_pixels, brightness=0.2, auto_write=False,pixel_order=ORDER, bpp=3)
 
+        def render_pixels(self, data):
+            # print(len(data))
+            for i in range(0, len(data)):
+                self.pixels[i] = data[i]
+            self.pixels.show()
 
+        def clear(self):
+            self.pixels.fill((0, 0, 0))
+            self.pixels.show()
+    strip = NeoPixelStrip(144)
 
-# Create a TCP/IP socket
-sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-sock.settimeout(0.0)
+elif STRIP_TYPE == 'APA102':
+    import apa102
+    class APA102Strip:
+        def __init__(self, num_pixels=144):
+            self.strip = apa102.APA102(num_pixels)
 
-# Bind the socket to the port
-server_address = ('10.0.0.2', 7777)
-print ( 'starting up on %s port %s' % server_address)
-sock.bind(server_address)
+        def render_pixels(self, data):
+            # print(len(data))
+            for i in range(0, len(data)):
+                self.strip.set_pixel(i, data[i][0], data[i][1], data[i][2])
+            self.strip.show()
 
-pixels.fill((0, 0, 0))
-pixels.show()
+        def clear(self):
+            self.strip.clear_strip()
+    strip = APA102Strip(144)
 
-target_fps = 20
 
 pkt_count = 0
 frame_count = 0
@@ -39,40 +53,49 @@ last_td = 0
 last_frame_count = 0
 last_pkt_count = 0
 
+pixel_channel = comm.PixelsChannel()
+pixel_channel.listen()
+
+all_data = []
+
+
+start_time = int(time.time()*1000.0)
+prev_ts = 0
 while True:
-    # print ('\nwaiting to receive message')
-    data, address = None, None
-    rcv = True
-    while rcv:
-        try:
-            data, address = sock.recvfrom(4096)
-            if pkt_count==0:
-                start = int(time.time()*1000.0)
-            pkt_count += 1
-        except:
-            if data == None:
-                time.sleep(1)
-                continue
-            rcv = False
+    pm = pixel_channel.recv()
+    ts = int(time.time()*1000.0) - start_time
+    # print(from_start - prev_from_start)
+
+
+    data = pm.pixels
 
     if len(data) == 0:
-        pixels.fill((0, 0, 0))
-        pixels.show()
-    # print ('(%s,%s,%s,%s),(%s,%s,%s,%s))' % (data[0], data[1], data[2], data[3], data[4], data[5], data[6], data[7]))
+        strip.clear()
+        continue
 
-    # pix_delta = np.split(data, 4)
+    # s1 = int(time.time()*1000.0)
+    strip.render_pixels(data)
+    # print(int(time.time()*1000.0 - s1))
 
-    for i in range(0, len(data), 4):
-        pixels[data[i]] = (data[i+1], data[i+2], data[i+3])
-    pixels.show()
-    frame_count += 1
-    td = (int(time.time()*1000.0) - start)
-    if td - last_td > 2000:
-        fps = 1000*(frame_count - last_frame_count)/(td-last_td)
-        print('fps-%s, pkt-%s, frm-%s, time=%s' % (fps, (pkt_count-last_pkt_count), (frame_count-last_frame_count), td))
-        last_td = td
-        last_frame_count = frame_count
-        last_pkt_count = pkt_count
+    # # print(len(data))
+    # for i in range(0, len(data)):
+    #     pixels[i] = data[i]
+    # pixels.show()
 
-    if td - last_td < 1000/target_fps:
-        time.sleep(((1000/target_fps) - (td - last_td))/1000)
+    # frame_count += 1
+    # td = (int(time.time()*1000.0) - start)
+    # if td - last_td > 2000:
+    #     fps = 1000*(frame_count - last_frame_count)/(td-last_td)
+    #     print('fps-%s, pkt-%s, frm-%s, time=%s' % (fps, (pkt_count-last_pkt_count), (frame_count-last_frame_count), td))
+    #     last_td = td
+    #     last_frame_count = frame_count
+    #     last_pkt_count = pkt_count
+
+    # if (ts - prev_ts) < (1000/TARGET_FPS):
+    #     print('fast')
+    #     time.sleep(1)
+    #     continue
+
+    print('ready')
+    prev_ts = ts
+
