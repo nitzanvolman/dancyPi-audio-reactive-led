@@ -82,20 +82,17 @@ while True:
     #     pixels[i] = data[i]
     # pixels.show()
 
-    # frame_count += 1
-    # td = (int(time.time()*1000.0) - start)
-    # if td - last_td > 2000:
-    #     fps = 1000*(frame_count - last_frame_count)/(td-last_td)
-    #     print('fps-%s, pkt-%s, frm-%s, time=%s' % (fps, (pkt_count-last_pkt_count), (frame_count-last_frame_count), td))
-    #     last_td = td
-    #     last_frame_count = frame_count
-    #     last_pkt_count = pkt_count
+    frame_count += 1
+    td = (int(time.time()*1000.0) - start)
+    if td - last_td > 2000:
+        fps = 1000*(frame_count - last_frame_count)/(td-last_td)
+        print('fps-%s, pkt-%s, frm-%s, time=%s' % (fps, (pkt_count-last_pkt_count), (frame_count-last_frame_count), td))
+        last_td = td
+        last_frame_count = frame_count
+        last_pkt_count = pkt_count
 
-    # if (ts - prev_ts) < (1000/TARGET_FPS):
-    #     print('fast')
-    #     time.sleep(1)
-    #     continue
 
-    print('ready')
+
+    # print('ready')
     prev_ts = ts
 

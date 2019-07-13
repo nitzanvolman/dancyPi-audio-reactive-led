@@ -27,7 +27,7 @@ if DEVICE == 'esp8266':
 
 if DEVICE == 'wifi':
     #UDP_IP = '192.168.0.150'
-    UDP_IP = '10.0.0.11'
+    UDP_IPS = ['10.0.0.11', '10.0.0.5']
     """IP address of the ESP8266. Must match IP in ws2812_controller.ino"""
     UDP_PORT = 7777
     """Port number used for socket communication between Python and ESP8266"""
@@ -59,7 +59,7 @@ USE_GUI = True
 USE_LED = False
 """Whether or not to display a PyQtGraph GUI plot of visualization"""
 
-DISPLAY_FPS = True
+DISPLAY_FPS = False
 """Whether to display the FPS when running (can reduce performance)"""
 
 N_PIXELS = 144

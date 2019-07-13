@@ -11,7 +11,9 @@ if config.DEVICE == 'esp8266':
     _sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 if config.DEVICE == 'wifi':
     import comm
-    pixel_channel = comm.PixelsChannel()
+    pixel_channels = []
+    for ip in config.UDP_IPS:
+        pixel_channels.append(comm.PixelsChannel(ip, config.UDP_PORT))
 # Raspberry Pi controls the LED strip directly
 elif config.DEVICE == 'pi':
     import neopixel
@@ -115,7 +117,8 @@ def _update_wifi():
     #     for i in packet_indices:
     #         m.append((p[0][i], p[1][i], p[2][i]))  # Index of pixel to change
     #
-    pixel_channel.send(np.copy(m), config.UDP_IP, config.UDP_PORT)
+    for pc in pixel_channels:
+        pc.send(np.copy(m))
     # print("===========================")
     _prev_pixels = np.copy(p)
 
